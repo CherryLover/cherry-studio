@@ -168,11 +168,34 @@ const MentionModelsButton: FC<Props> = ({ mentionModels, onMentionModel: onSelec
   }, [])
 
   useEffect(() => {
+    if (selectedIndex >= 0 && menuRef.current) {
+      const menuElement = menuRef.current
+      const selectedElement = menuElement.querySelector('.ant-dropdown-menu-item-selected')
+
+      if (selectedElement) {
+        const menuRect = menuElement.getBoundingClientRect()
+        const selectedRect = selectedElement.getBoundingClientRect()
+
+        if (selectedRect.bottom > menuRect.bottom) {
+          selectedElement.scrollIntoView({ block: 'nearest', behavior: 'auto' })
+        } else if (selectedRect.top < menuRect.top) {
+          selectedElement.scrollIntoView({ block: 'nearest', behavior: 'auto' })
+        }
+      }
+    }
+  }, [selectedIndex])
+
+  useEffect(() => {
     const showModelSelector = () => {
       dropdownRef.current?.click()
       setIsOpen(true)
       setSelectedIndex(0)
       setSearchText('')
+      setTimeout(() => {
+        if (menuRef.current) {
+          menuRef.current.scrollTop = 0
+        }
+      }, 0)
     }
 
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -180,10 +203,10 @@ const MentionModelsButton: FC<Props> = ({ mentionModels, onMentionModel: onSelec
 
       if (e.key === 'ArrowDown') {
         e.preventDefault()
-        setSelectedIndex((prev) => (prev < flatModelItems.length - 1 ? prev + 1 : prev))
+        setSelectedIndex((prev) => (prev < flatModelItems.length - 1 ? prev + 1 : 0))
       } else if (e.key === 'ArrowUp') {
         e.preventDefault()
-        setSelectedIndex((prev) => (prev > 0 ? prev - 1 : prev))
+        setSelectedIndex((prev) => (prev > 0 ? prev - 1 : flatModelItems.length - 1))
       } else if (e.key === 'Enter') {
         e.preventDefault()
         if (selectedIndex >= 0 && selectedIndex < flatModelItems.length) {
@@ -293,19 +316,24 @@ const DropdownMenuStyle = createGlobalStyle`
       overflow-x: hidden;
       padding: 4px 0;
       margin-bottom: 40px;
+      position: relative;
 
       &::-webkit-scrollbar {
         width: 6px;
         height: 6px;
       }
 
-      &::-webkit-scrollbar-thumb {
-        background: var(--color-scrollbar);
-        border-radius: 3px;
-      }
-
       &::-webkit-scrollbar-track {
         background: transparent;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        border-radius: 10px;
+        background: var(--color-scrollbar-thumb);
+        
+        &:hover {
+          background: var(--color-scrollbar-thumb-hover);
+        }
       }
     }
 

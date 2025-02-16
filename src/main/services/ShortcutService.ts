@@ -22,7 +22,11 @@ function getShortcutHandler(shortcut: Shortcut) {
     case 'show_app':
       return (window: BrowserWindow) => {
         if (window.isVisible()) {
-          window.hide()
+          if (window.isFocused()) {
+            window.hide()
+          } else {
+            window.focus()
+          }
         } else {
           window.show()
           window.focus()
@@ -75,11 +79,11 @@ export function registerShortcuts(window: BrowserWindow) {
 
         const accelerator = formatShortcutKey(shortcut.shortcut)
 
-        if (shortcut.key === 'show_app') {
+        if (shortcut.key === 'show_app' && shortcut.enabled) {
           showAppAccelerator = accelerator
         }
 
-        if (shortcut.key === 'mini_window') {
+        if (shortcut.key === 'mini_window' && shortcut.enabled) {
           showMiniWindowAccelerator = accelerator
         }
 
